@@ -338,8 +338,8 @@ Route::middleware(['auth', 'subscription'])->group(function () {
         // Sales: Invoices
         Route::get('sales-invoices/export', [\App\Http\Controllers\SalesInvoiceController::class, 'export'])->name('sales-invoices.export');
         Route::resource('sales-invoices', \App\Http\Controllers\SalesInvoiceController::class);
-        Route::post('sales-invoices/{id}/confirm', [\App\Http\Controllers\SalesInvoiceController::class, 'confirm'])->name('sales-invoices.confirm');
         Route::post('sales-invoices/{id}/void', [\App\Http\Controllers\SalesInvoiceController::class, 'void'])->name('sales-invoices.void');
+        Route::delete('sales-invoices/{sales_invoice}', fn() => redirect()->back()->with('error', 'Invoices cannot be deleted. Use Void instead.'))->name('sales-invoices.destroy');
         Route::get('sales-invoices/{id}/pay', [\App\Http\Controllers\SalesInvoiceController::class, 'showPaymentForm'])->name('sales-invoices.pay');
         Route::post('sales-invoices/{id}/pay', [\App\Http\Controllers\SalesInvoiceController::class, 'storePayment'])->name('sales-invoices.pay.store');
         Route::get('sales-invoices/{id}/print', [\App\Http\Controllers\SalesInvoiceController::class, 'print'])->name('sales-invoices.print');

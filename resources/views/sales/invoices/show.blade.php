@@ -18,25 +18,27 @@
                 <a href="{{ $returnUrl }}" class="btn btn-secondary me-2">Back</a>
                 <a href="{{ route('sales-invoices.print', $invoice->id) }}" target="_blank" class="btn btn-info me-2"><i class="ti ti-printer"></i> Print</a>
                 <button type="button" class="btn btn-outline-secondary me-2" id="thermalPrintBtn"><i class="ti ti-receipt"></i> Thermal Print</button>
-                @if($invoice->status === 'draft' && $canEdit)
+
+                @if($invoice->canEdit() && $canEdit)
                 <a href="{{ route('sales-invoices.edit', array_merge(['sales_invoice' => $invoice->id], $returnParams)) }}" class="btn btn-warning me-2">
                     <i class="ti ti-edit me-1"></i> Edit
                 </a>
-                <button type="button" class="btn btn-primary me-2" id="confirmInvoiceBtn">
-                    <i class="ti ti-check me-1"></i> Confirm Invoice
+                @endif
+
+                @if(!$invoice->isVoided() && $invoice->balance_due > 0)
+                <a href="{{ route('sales-invoices.pay', array_merge(['id' => $invoice->id], $returnParams)) }}" class="btn btn-primary me-2">
+                    <i class="ti ti-cash me-1"></i> Record Payment
+                </a>
+                @endif
+
+                @if($invoice->canVoid() && $canEdit)
+                <button type="button" class="btn btn-outline-danger" id="voidInvoiceBtn">
+                    <i class="ti ti-ban me-1"></i> Void Invoice
                 </button>
                 @endif
-                @if(in_array($invoice->status, ['confirmed', 'posted']))
-                    @if($invoice->balance_due > 0)
-                    <a href="{{ route('sales-invoices.pay', array_merge(['id' => $invoice->id], $returnParams)) }}" class="btn btn-primary">
-                        <i class="ti ti-cash me-1"></i> Record Payment
-                    </a>
-                    @endif
-                    @if($invoice->paid_amount == 0 && $canEdit)
-                    <button type="button" class="btn btn-outline-danger ms-1" id="voidInvoiceBtn">
-                        <i class="ti ti-ban me-1"></i> Void Invoice
-                    </button>
-                    @endif
+
+                @if($invoice->isVoided())
+                <span class="badge bg-dark fs-6 px-3 py-2">VOIDED</span>
                 @endif
             </div>
         </div>
@@ -202,86 +204,39 @@ document.addEventListener('keydown', function (e) {
 </script>
 @endpush
 
-@if(in_array($invoice->status, ['confirmed', 'posted']) && $invoice->paid_amount == 0)
+@if($invoice->canVoid())
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const voidBtn = document.getElementById('voidInvoiceBtn');
-    if (voidBtn) {
-        voidBtn.addEventListener('click', function() {
-            if (!confirm('Void invoice {{ $invoice->invoice_number }}?\n\nThis will:\n• Mark the invoice as VOIDED\n• Restore all stock back to inventory\n• Set balance to 0\n\nThis cannot be undone.')) return;
+    if (!voidBtn) return;
+    voidBtn.addEventListener('click', function() {
+        if (!confirm('Void invoice {{ $invoice->invoice_number }}?\n\nThis will:\n• Mark the invoice as VOIDED\n• Restore all stock back to inventory\n• Set balance to 0\n\nThis cannot be undone.')) return;
 
-            voidBtn.disabled = true;
-            voidBtn.innerHTML = '<i class="ti ti-loader me-1"></i> Voiding…';
+        voidBtn.disabled = true;
+        voidBtn.innerHTML = '<i class="ti ti-loader me-1"></i> Voiding…';
 
-            fetch('{{ route("sales-invoices.void", $invoice->id) }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json',
-                }
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    showToast(data.message, 'success');
-                    setTimeout(() => window.location.reload(), 1000);
-                } else {
-                    showToast('Error: ' + (data.error || 'Unknown error'), 'error');
-                    voidBtn.disabled = false;
-                    voidBtn.innerHTML = '<i class="ti ti-ban me-1"></i> Void Invoice';
-                }
-            })
-            .catch(() => {
-                showToast('Error voiding invoice. Please try again.', 'error');
+        fetch('{{ route("sales-invoices.void", $invoice->id) }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                showToast(data.message, 'success');
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                showToast('Error: ' + (data.error || 'Unknown error'), 'error');
                 voidBtn.disabled = false;
                 voidBtn.innerHTML = '<i class="ti ti-ban me-1"></i> Void Invoice';
-            });
+            }
+        })
+        .catch(() => {
+            showToast('Error voiding invoice. Please try again.', 'error');
+            voidBtn.disabled = false;
+            voidBtn.innerHTML = '<i class="ti ti-ban me-1"></i> Void Invoice';
         });
-    }
-});
-</script>
-@endpush
-@endif
-
-@if($invoice->status === 'draft')
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const confirmBtn = document.getElementById('confirmInvoiceBtn');
-    if (confirmBtn) {
-        confirmBtn.addEventListener('click', function() {
-            confirmBtn.disabled = true;
-            confirmBtn.innerHTML = '<i class="ti ti-loader me-1"></i> Confirming...';
-
-            fetch('{{ route("sales-invoices.confirm", $invoice->id) }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showToast(data.message, 'success');
-                    setTimeout(() => window.location.reload(), 1000);
-                } else {
-                    showToast('Error: ' + (data.error || 'Unknown error'), 'error');
-                    confirmBtn.disabled = false;
-                    confirmBtn.innerHTML = '<i class="ti ti-check me-1"></i> Confirm Invoice';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showToast('Error confirming invoice. Please try again.', 'error');
-                confirmBtn.disabled = false;
-                confirmBtn.innerHTML = '<i class="ti ti-check me-1"></i> Confirm Invoice';
-            });
-        });
-    }
+    });
 });
 </script>
 @endpush

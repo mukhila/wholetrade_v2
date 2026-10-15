@@ -11,6 +11,7 @@
         case 'waiting_for_approval':
             $color = 'warning';
             break;
+        case 'active':
         case 'approved':
         case 'verified':
         case 'converted':

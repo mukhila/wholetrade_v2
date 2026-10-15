@@ -86,44 +86,37 @@ class SalesInvoice extends Model
             ->withTimestamps();
     }
 
-    /**
-     * Check if the invoice is in draft status.
-     */
-    public function isDraft(): bool
+    public function isVoided(): bool
     {
-        return $this->status === 'draft';
+        return $this->status === 'voided';
+    }
+
+    public function isPaid(): bool
+    {
+        return $this->payment_status === 'paid';
     }
 
     /**
-     * Check if the invoice is confirmed.
-     */
-    public function isConfirmed(): bool
-    {
-        return $this->status === 'confirmed';
-    }
-
-    /**
-     * Check if the invoice can be edited (only drafts).
+     * Editable any time except when fully paid or voided.
      */
     public function canEdit(): bool
     {
-        return $this->isDraft();
+        return !$this->isVoided() && !$this->isPaid();
     }
 
     /**
-     * Check if the invoice can be confirmed (only drafts).
+     * Can be voided as long as it has not been fully paid.
      */
-    public function canConfirm(): bool
+    public function canVoid(): bool
     {
-        return $this->isDraft();
+        return !$this->isVoided() && !$this->isPaid();
     }
 
     /**
-     * Check if the invoice can receive payments (confirmed or posted with balance due).
-     * Supports 'posted' for backward compatibility with existing data.
+     * Receives payment when active/posted and balance remains.
      */
     public function canReceivePayment(): bool
     {
-        return ($this->isConfirmed() || $this->status === 'posted') && $this->balance_due > 0;
+        return !$this->isVoided() && $this->balance_due > 0;
     }
 }

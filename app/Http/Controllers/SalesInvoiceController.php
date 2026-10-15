@@ -224,7 +224,7 @@ class SalesInvoiceController extends Controller
                 'balance_due' => $request->net_total ?? 0,
 
                 'remarks' => $request->remarks,
-                'status' => 'draft',
+                'status' => 'active',
             ]);
 
             // Generate type-specific sequential invoice number using count within each series
@@ -303,11 +303,22 @@ class SalesInvoiceController extends Controller
                 ]);
             }
 
-            // TODO: Post to GL if Accounting module exists
+            // Deduct stock immediately on creation (no confirm step)
+            foreach ($invoice->fresh('items.product')->items as $item) {
+                if ($item->product_id && $item->product) {
+                    StockService::deductStock(
+                        $item->product,
+                        (int) $item->box_qty,
+                        (int) $item->item_qty,
+                        'Sales Invoice',
+                        ['invoice_number' => $invoice->invoice_number, 'invoice_id' => $invoice->id, 'customer_id' => $invoice->customer_id]
+                    );
+                }
+            }
 
             DB::commit();
             return response()->json([
-                'success' => true, 
+                'success' => true,
                 'message' => 'Sales Invoice created successfully!',
                 'id' => $invoice->id,
                 'redirect' => route('sales-invoices.index')
@@ -765,16 +776,15 @@ class SalesInvoiceController extends Controller
     }
 
     /**
-     * Show the form for editing a draft invoice.
+     * Show the form for editing an invoice (blocked only when paid or voided).
      */
     public function edit($id)
     {
         $invoice = SalesInvoice::with('items.product', 'customer.tax', 'currency', 'salesperson')->findOrFail($id);
 
-        // Only draft invoices can be edited
         if (!$invoice->canEdit()) {
-            return redirect()->route('sales-invoices.show', $id)
-                ->with('error', 'Only draft invoices can be edited.');
+            $reason = $invoice->isVoided() ? 'Voided invoices cannot be edited.' : 'Fully paid invoices cannot be edited.';
+            return redirect()->route('sales-invoices.show', $id)->with('error', $reason);
         }
 
         $customers = Associate::where('type', 'Customer')->where('status', true)->with('tax')->get();
@@ -793,18 +803,16 @@ class SalesInvoiceController extends Controller
     }
 
     /**
-     * Update a draft invoice.
+     * Update an invoice (blocked only when paid or voided).
      */
     public function update(Request $request, $id)
     {
         $this->checkStaffPermission('sales-invoices', 'edit');
-        $invoice = SalesInvoice::findOrFail($id);
+        $invoice = SalesInvoice::with('items.product')->findOrFail($id);
 
         if (!$invoice->canEdit()) {
-            return response()->json([
-                'success' => false,
-                'error' => 'Only draft invoices can be edited.'
-            ], 403);
+            $reason = $invoice->isVoided() ? 'Voided invoices cannot be edited.' : 'Fully paid invoices cannot be edited.';
+            return response()->json(['success' => false, 'error' => $reason], 403);
         }
 
         // BUG-005 FIX: invoice_number is system-generated; no longer validated from request.
@@ -841,6 +849,19 @@ class SalesInvoiceController extends Controller
                 'balance_due'      => $newBalanceDue,
                 'remarks'          => $request->remarks,
             ]);
+
+            // Restore stock for old items before replacing them
+            foreach ($invoice->items as $oldItem) {
+                if ($oldItem->product_id && $oldItem->product) {
+                    StockService::addStock(
+                        $oldItem->product,
+                        (int) $oldItem->box_qty,
+                        (int) $oldItem->item_qty,
+                        'Invoice Edit - Restore',
+                        ['invoice_number' => $invoice->invoice_number, 'invoice_id' => $invoice->id]
+                    );
+                }
+            }
 
             // Delete old items and create new ones
             $invoice->items()->delete();
@@ -911,6 +932,19 @@ class SalesInvoiceController extends Controller
                 ]);
             }
 
+            // Re-deduct stock for new items
+            foreach ($invoice->fresh('items.product')->items as $newItem) {
+                if ($newItem->product_id && $newItem->product) {
+                    StockService::deductStock(
+                        $newItem->product,
+                        (int) $newItem->box_qty,
+                        (int) $newItem->item_qty,
+                        'Sales Invoice',
+                        ['invoice_number' => $invoice->invoice_number, 'invoice_id' => $invoice->id, 'customer_id' => $invoice->customer_id]
+                    );
+                }
+            }
+
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -925,96 +959,30 @@ class SalesInvoiceController extends Controller
     }
 
     /**
-     * Confirm a draft invoice and deduct inventory.
+     * Confirm route kept for backward compatibility but no longer needed.
+     * Invoices are active from creation.
      */
     public function confirm($id)
     {
-        $this->checkStaffPermission('sales-invoices', 'edit');
-        $invoice = SalesInvoice::with('items.product')->findOrFail($id);
-
-        // Only draft invoices can be confirmed
-        if (!$invoice->canConfirm()) {
-            return response()->json([
-                'success' => false,
-                'error' => 'Only draft invoices can be confirmed.'
-            ], 403);
-        }
-
-        DB::beginTransaction();
-        try {
-            // Deduct inventory for each item with audit logging
-            foreach ($invoice->items as $item) {
-                if ($item->product_id) {
-                    $product = $item->product;
-
-                    StockService::deductStock(
-                        $product,
-                        (int) $item->box_qty,
-                        (int) $item->item_qty,
-                        'Sales Invoice',
-                        [
-                            'invoice_number' => $invoice->invoice_number,
-                            'invoice_id' => $invoice->id,
-                            'customer_id' => $invoice->customer_id,
-                            'item_id' => $item->id,
-                        ]
-                    );
-                }
-            }
-
-            // Update invoice status to confirmed
-            $invoice->update(['status' => 'confirmed']);
-
-            // Log the confirmation action
-            AuditLog::log(
-                AuditLog::ACTION_CONFIRM,
-                AuditLog::MODULE_SALES_INVOICE,
-                $invoice,
-                [
-                    'reference_code' => $invoice->invoice_number,
-                    'description' => "Sales Invoice {$invoice->invoice_number} confirmed",
-                    'metadata' => [
-                        'customer_id' => $invoice->customer_id,
-                        'net_total' => $invoice->net_total,
-                        'items_count' => $invoice->items->count(),
-                    ],
-                ]
-            );
-
-            DB::commit();
-            return response()->json([
-                'success' => true,
-                'message' => 'Invoice confirmed successfully! Inventory has been deducted.',
-                'redirect' => route('sales-invoices.show', $id)
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
-        }
+        return response()->json([
+            'success' => false,
+            'error'   => 'Invoices no longer require confirmation. They are active from creation.',
+        ], 410);
     }
 
     /**
-     * Void a confirmed/posted invoice that has no payments recorded.
-     * Reverses inventory deductions and marks the invoice as voided.
+     * Void an invoice. Restores stock. Blocked only if fully paid.
      */
     public function void($id)
     {
         $this->checkStaffPermission('sales-invoices', 'edit');
         $invoice = SalesInvoice::with('items.product')->findOrFail($id);
 
-        if (!in_array($invoice->status, ['confirmed', 'posted'])) {
-            return response()->json([
-                'success' => false,
-                'error'   => 'Only confirmed or posted invoices can be voided.',
-            ], 422);
-        }
-
-        if ($invoice->paid_amount > 0) {
-            return response()->json([
-                'success' => false,
-                'error'   => 'Cannot void an invoice that has payments recorded. Reverse the payment first.',
-            ], 422);
+        if (!$invoice->canVoid()) {
+            $reason = $invoice->isVoided()
+                ? 'This invoice is already voided.'
+                : 'Cannot void a fully paid invoice.';
+            return response()->json(['success' => false, 'error' => $reason], 422);
         }
 
         DB::beginTransaction();
@@ -1107,10 +1075,9 @@ class SalesInvoiceController extends Controller
         $invoice = SalesInvoice::with(['customer', 'currency', 'receipts'])
             ->findOrFail($id);
 
-        // Check if invoice can receive payment (must be confirmed, not draft)
         if (!$invoice->canReceivePayment()) {
             return redirect()->route('sales-invoices.show', $id)
-                ->with('error', 'This invoice cannot receive payments. It must be confirmed first.');
+                ->with('error', 'This invoice cannot receive payments.');
         }
 
         $currencies = Currency::where('is_default', 1)->get();
@@ -1140,12 +1107,8 @@ class SalesInvoiceController extends Controller
 
         $invoice = SalesInvoice::findOrFail($id);
 
-        // Guard: only confirmed/posted invoices can receive payment
         if (!$invoice->canReceivePayment()) {
-            return response()->json([
-                'success' => false,
-                'error' => 'This invoice cannot receive payments. It must be confirmed first.'
-            ], 403);
+            return response()->json(['success' => false, 'error' => 'This invoice cannot receive payments.'], 403);
         }
 
         // BUG-018 FIX: apply the same 0.01 rounding tolerance in the guard that is used

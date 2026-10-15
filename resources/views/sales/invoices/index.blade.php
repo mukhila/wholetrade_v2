@@ -210,20 +210,21 @@
                                         <a href="{{ route('sales-invoices.show', ['sales_invoice' => $inv->id, 'return_url' => request()->fullUrl() . '#invoice-' . $inv->id]) }}" class="btn btn-sm btn-soft-primary" title="View">
                                             <i class="ti ti-eye"></i>
                                         </a>
-                                        @if($inv->status === 'draft' && $canEdit)
+                                        @if($inv->canEdit() && $canEdit)
                                         <a href="{{ route('sales-invoices.edit', $inv->id) }}" class="btn btn-sm btn-soft-warning" title="Edit">
                                             <i class="ti ti-edit"></i>
                                         </a>
                                         @endif
-                                        @if(in_array($inv->status, ['confirmed', 'posted']))
-                                        @if($inv->balance_due > 0)
+                                        @if(!$inv->isVoided() && $inv->balance_due > 0)
                                         <a href="{{ route('sales-invoices.pay', ['id' => $inv->id, 'return_url' => request()->fullUrl() . '#invoice-' . $inv->id]) }}" class="btn btn-sm btn-soft-success" title="Record Payment">
                                             <i class="ti ti-cash"></i> Pay
                                         </a>
                                         @endif
-                                        @endif
-                                        @if($inv->status === 'voided')
-                                        <span class="badge bg-dark">VOIDED</span>
+                                        @if($inv->canVoid() && $canEdit)
+                                        <button type="button" class="btn btn-sm btn-soft-danger void-btn" title="Void Invoice"
+                                            data-id="{{ $inv->id }}" data-num="{{ $inv->invoice_number }}">
+                                            <i class="ti ti-ban"></i>
+                                        </button>
                                         @endif
                                     </td>
                                 </tr>
@@ -375,6 +376,39 @@ function switchTab(tab, el) {
     if (summaryEl) summaryEl.classList.add('d-none');
     document.getElementById('tab-' + tab).classList.remove('d-none');
 }
+</script>
+@endpush
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.void-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var id  = this.dataset.id;
+            var num = this.dataset.num;
+            if (!confirm('Void invoice ' + num + '?\n\nThis will restore stock and cannot be undone.')) return;
+            var b = this;
+            b.disabled = true;
+            fetch('/sales-invoices/' + id + '/void', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    var row = document.getElementById('invoice-' + id);
+                    if (row) { row.style.opacity = '0.55'; row.style.textDecoration = 'line-through'; }
+                    b.closest('td').innerHTML = '<span class="badge bg-dark">VOIDED</span>';
+                    if (typeof showToast === 'function') showToast(data.message, 'success');
+                } else {
+                    if (typeof showToast === 'function') showToast(data.error || 'Error', 'error');
+                    b.disabled = false;
+                }
+            })
+            .catch(() => { if (typeof showToast === 'function') showToast('Error voiding invoice.', 'error'); b.disabled = false; });
+        });
+    });
+});
 </script>
 @endpush
 
