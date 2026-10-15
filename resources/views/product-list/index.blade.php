@@ -1611,7 +1611,7 @@ function confirmInvoice() {
 
 function printInvoice(type) {
     if (!currentInvoiceId) return;
-    if (type === 'thermal') {
+    if (type === 'thermal' && /android/i.test(navigator.userAgent)) {
         var savedMm = 80;
         try { savedMm = parseInt(localStorage.getItem('tp_paper_mm')) || 80; } catch (e) {}
         window.printViaBle(currentInvoiceId, savedMm);

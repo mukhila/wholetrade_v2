@@ -182,9 +182,13 @@
 @push('scripts')
 <script>
 document.getElementById('thermalPrintBtn').addEventListener('click', function () {
-    var savedMm = 80;
-    try { savedMm = parseInt(localStorage.getItem('tp_paper_mm')) || 80; } catch (e) {}
-    window.printViaBle({{ $invoice->id }}, savedMm);
+    if (/android/i.test(navigator.userAgent)) {
+        var savedMm = 80;
+        try { savedMm = parseInt(localStorage.getItem('tp_paper_mm')) || 80; } catch (e) {}
+        window.printViaBle({{ $invoice->id }}, savedMm);
+    } else {
+        window.open('{{ route("sales-invoices.print", $invoice->id) }}', '_blank');
+    }
 });
 
 document.getElementById('thermalPrintClose').addEventListener('click', function () {

@@ -355,6 +355,18 @@ document.getElementById('btnModalThermalPrint').addEventListener('click', functi
 });
 
 async function printReportViaBle(filters) {
+    // Desktop/iOS: open the thermal print page in a new tab — it auto-triggers window.print()
+    if (!/android/i.test(navigator.userAgent || '')) {
+        var baseUrl = window.APP_URL || (window.location.origin + '/');
+        if (!baseUrl.endsWith('/')) baseUrl += '/';
+        var qs = Object.keys(filters).map(function (k) {
+            return encodeURIComponent(k) + '=' + encodeURIComponent(filters[k]);
+        }).join('&');
+        window.open(baseUrl + 'reports/customers/print-detailed-thermal' + (qs ? '?' + qs : ''), '_blank');
+        return;
+    }
+
+    // Android: send to print app via PrintBridge
     var savedMm = 80;
     try { savedMm = parseInt(localStorage.getItem('tp_paper_mm')) || 80; } catch (e) {}
     var baseUrl = window.APP_URL || (window.location.origin + '/');
@@ -362,7 +374,7 @@ async function printReportViaBle(filters) {
     var csrf = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
 
     try {
-        if (typeof showToast === 'function') showToast('🖨️ Sending report to print service…', 'info');
+        if (typeof showToast === 'function') showToast('Sending report to print app…', 'info');
 
         const resp = await fetch(baseUrl + 'reports/customers/direct-print-thermal', {
             method: 'POST',
@@ -377,43 +389,17 @@ async function printReportViaBle(filters) {
         const d = await resp.json();
         if (!d.success) throw new Error(d.error || 'Could not queue print job');
 
-        // On Android: launch the Whole Trade Print App (same as invoice flow)
-        if (/android/i.test(navigator.userAgent || '')) {
-            var fbUrl = baseUrl + 'reports/customers/print-detailed-thermal';
-            var q = 'job_id='    + encodeURIComponent(d.job_id) +
-                    '&invoice_id=0' +
-                    '&server_url=' + encodeURIComponent(baseUrl.replace(/\/$/, '')) +
-                    '&width='      + encodeURIComponent(savedMm) +
-                    '&t='          + Date.now();
-            window.location.href = 'intent://preview?' + q +
-                '#Intent;scheme=wholetradeprint;package=com.techgeeks.wholetradeprint;' +
-                'S.browser_fallback_url=' + encodeURIComponent(fbUrl) + ';end';
-            return;
-        }
-
-        // Non-Android: poll for completion
-        for (let n = 0; n < 15; n++) {
-            await new Promise(function (r) { setTimeout(r, 2000); });
-            let s = null;
-            try {
-                const sr = await fetch(baseUrl + 'print-jobs/' + d.job_id + '/status', {
-                    credentials: 'same-origin',
-                    headers: { 'Accept': 'application/json' }
-                });
-                s = await sr.json();
-            } catch (netErr) { continue; }
-
-            if (s.status === 'done') {
-                if (typeof showToast === 'function') showToast('✓ Report printed successfully!', 'success');
-                return;
-            }
-            if (s.status === 'failed') {
-                throw new Error(s.error || 'printer reported failure');
-            }
-        }
-        throw new Error('Timed out — is the Whole Trade Print App open on the phone?');
+        var fbUrl = baseUrl + 'reports/customers/print-detailed-thermal';
+        var q = 'job_id='    + encodeURIComponent(d.job_id) +
+                '&invoice_id=0' +
+                '&server_url=' + encodeURIComponent(baseUrl.replace(/\/$/, '')) +
+                '&width='      + encodeURIComponent(savedMm) +
+                '&t='          + Date.now();
+        window.location.href = 'intent://preview?' + q +
+            '#Intent;scheme=wholetradeprint;package=com.techgeeks.wholetradeprint;' +
+            'S.browser_fallback_url=' + encodeURIComponent(fbUrl) + ';end';
     } catch (err) {
-        if (typeof showToast === 'function') showToast('✗ Print failed: ' + err.message, 'error');
+        if (typeof showToast === 'function') showToast('Print failed: ' + err.message, 'error');
     }
 }
 
