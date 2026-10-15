@@ -1,0 +1,22 @@
+R_DEF: Internal format may change without notice
+local
+drawable ic_launcher
+id btnLogin
+id btnLogout
+id btnOpenGallery
+id btnPickPrinter
+id btnService
+id btnTestPrint
+id cbAutoCut
+id etCompanyCode
+id etServer
+id layoutDashboard
+id layoutLogin
+id tvDashboardCompanyName
+id tvLog
+id tvLoginStatus
+id tvPrinter
+id tvServiceStatus
+layout activity_main
+string app_name
+style Theme.WTPrint

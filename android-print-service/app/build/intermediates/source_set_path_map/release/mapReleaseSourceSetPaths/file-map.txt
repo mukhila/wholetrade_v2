@@ -1,0 +1,7 @@
+com.techgeeks.wholetradeprint.app-pngs-0 D:\xampp\htdocs\wholetrade\android-print-service\app\build\generated\res\pngs\release
+com.techgeeks.wholetradeprint.app-resValues-1 D:\xampp\htdocs\wholetrade\android-print-service\app\build\generated\res\resValues\release
+com.techgeeks.wholetradeprint.app-packageReleaseResources-2 D:\xampp\htdocs\wholetrade\android-print-service\app\build\intermediates\incremental\release\packageReleaseResources\merged.dir
+com.techgeeks.wholetradeprint.app-packageReleaseResources-3 D:\xampp\htdocs\wholetrade\android-print-service\app\build\intermediates\incremental\release\packageReleaseResources\stripped.dir
+com.techgeeks.wholetradeprint.app-release-4 D:\xampp\htdocs\wholetrade\android-print-service\app\build\intermediates\merged_res\release\mergeReleaseResources
+com.techgeeks.wholetradeprint.app-main-5 D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\res
+com.techgeeks.wholetradeprint.app-release-6 D:\xampp\htdocs\wholetrade\android-print-service\app\src\release\res

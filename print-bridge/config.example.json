@@ -1,0 +1,24 @@
+{
+  "_comment": "Copy this file to config.json and fill in your values",
+
+  "server_url":   "https://sgtrade.techgeeksdigi.com/print-bridge",
+  "token":        "PASTE_PRINT_BRIDGE_TOKEN_FROM_DOT_ENV_HERE",
+  "station":      "main",
+  "format":       "escpos",
+  "poll_ms":      2000,
+
+  "connection":   "network",
+
+  "printer_host": "192.168.1.100",
+  "printer_port": 9100,
+
+  "_usb_note":    "For USB: set connection=usb and printer_path below",
+  "printer_path": "POS-80C",
+
+  "_cups_note":   "For CUPS (Linux): set connection=cups and cups_name below",
+  "cups_name":    "TSC_DA200",
+
+  "_serial_note": "For serial: set connection=serial and com_port, com_baud below",
+  "com_port":     "COM3",
+  "com_baud":     9600
+}

@@ -1,0 +1,18 @@
+{
+  "server": "https://sgtrade.techgeeksdigi.com",
+  "token": "PASTE-THE-SAME-VALUE-AS-PRINT_BRIDGE_TOKEN-IN-.ENV",
+  "station": "main",
+  "interval_ms": 3000,
+
+  "printer": {
+    "_comment": "Pick ONE type and delete the others.",
+
+    "type": "network",
+    "host": "192.168.1.100",
+    "port": 9100,
+
+    "_windows_share_example": { "type": "windows-share", "computer": "localhost", "share": "TSCPRINTER" },
+    "_cups_example":          { "type": "cups", "name": "TSC_TE244" },
+    "_serial_example":        { "type": "serial", "device": "COM5" }
+  }
+}

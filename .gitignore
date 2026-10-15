@@ -20,3 +20,9 @@ yarn-error.log
 *.sln
 *.sw?
 /public/build
+android-print-service/.gradle/
+android-print-service/build/
+android-print-service/app/build/
+CURRENCY_ANALYSIS.md
+PRICE_UPDATES_ANALYSIS.md
+/old/

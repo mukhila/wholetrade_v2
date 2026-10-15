@@ -1,0 +1,153 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.techgeeks.wholetradeprint"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="24"
+9        android:targetSdkVersion="34" />
+10
+11    <uses-permission android:name="android.permission.INTERNET" />
+11-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:4:5-67
+11-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:4:22-64
+12
+13    <!-- Bluetooth Classic (SPP). Legacy perms for Android 11 and below. -->
+14    <uses-permission
+14-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:7:5-95
+15        android:name="android.permission.BLUETOOTH"
+15-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:7:22-65
+16        android:maxSdkVersion="30" />
+16-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:7:66-92
+17    <uses-permission
+17-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:8:5-101
+18        android:name="android.permission.BLUETOOTH_ADMIN"
+18-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:8:22-71
+19        android:maxSdkVersion="30" />
+19-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:8:72-98
+20    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+20-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:9:5-76
+20-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:9:22-73
+21    <uses-permission
+21-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:10:5-12:58
+22        android:name="android.permission.BLUETOOTH_SCAN"
+22-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:11:9-57
+23        android:usesPermissionFlags="neverForLocation" />
+23-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:12:9-55
+24    <uses-permission android:name="android.permission.WAKE_LOCK" />
+24-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:14:5-68
+24-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:14:22-65
+25    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+25-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:15:5-77
+25-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:15:22-74
+26    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+26-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:16:5-87
+26-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:16:22-84
+27    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+27-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:17:5-77
+27-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:17:22-74
+28    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+28-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:18:5-81
+28-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:18:22-78
+29
+30    <!-- Gallery fallback save on Android 9 and below (Q+ uses MediaStore, no permission) -->
+31    <uses-permission
+31-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:21:5-23:38
+32        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+32-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:22:9-65
+33        android:maxSdkVersion="28" />
+33-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:23:9-35
+34
+35    <!-- Optional: lets the service auto-open the receipt preview from background -->
+36    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+36-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:26:5-78
+36-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:26:22-75
+37
+38    <application
+38-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:28:5-72:19
+39        android:name="com.techgeeks.wholetradeprint.WTApp"
+39-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:29:9-30
+40        android:allowBackup="true"
+40-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:33:9-35
+41        android:extractNativeLibs="false"
+42        android:icon="@drawable/ic_launcher"
+42-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:31:9-45
+43        android:label="@string/app_name"
+43-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:30:9-41
+44        android:theme="@style/Theme.WTPrint" >
+44-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:32:9-45
+45        <activity
+45-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:35:9-51:20
+46            android:name="com.techgeeks.wholetradeprint.MainActivity"
+46-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:36:13-41
+47            android:exported="true"
+47-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:37:13-36
+48            android:screenOrientation="portrait" >
+48-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:38:13-49
+49            <intent-filter>
+49-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:39:13-42:29
+50                <action android:name="android.intent.action.MAIN" />
+50-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:40:17-69
+50-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:40:25-66
+51
+52                <category android:name="android.intent.category.LAUNCHER" />
+52-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:41:17-77
+52-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:41:27-74
+53            </intent-filter>
+54            <intent-filter>
+54-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:43:13-50:29
+55                <action android:name="android.intent.action.VIEW" />
+55-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:44:17-69
+55-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:44:25-66
+56
+57                <category android:name="android.intent.category.DEFAULT" />
+57-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:45:17-76
+57-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:45:27-73
+58                <category android:name="android.intent.category.BROWSABLE" />
+58-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:46:17-78
+58-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:46:27-75
+59
+60                <data
+60-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:47:17-49:46
+61                    android:host="preview"
+61-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:49:21-43
+62                    android:scheme="wholetradeprint" />
+62-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:48:21-53
+63            </intent-filter>
+64        </activity>
+65        <activity
+65-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:53:9-57:45
+66            android:name="com.techgeeks.wholetradeprint.PreviewActivity"
+66-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:54:13-44
+67            android:exported="false"
+67-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:55:13-37
+68            android:launchMode="singleTop"
+68-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:56:13-43
+69            android:showWhenLocked="true" />
+69-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:57:13-42
+70
+71        <service
+71-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:59:9-62:56
+72            android:name="com.techgeeks.wholetradeprint.PrintPollingService"
+72-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:60:13-48
+73            android:exported="false"
+73-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:61:13-37
+74            android:foregroundServiceType="dataSync" />
+74-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:62:13-53
+75
+76        <receiver
+76-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:64:9-70:20
+77            android:name="com.techgeeks.wholetradeprint.BootReceiver"
+77-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:65:13-41
+78            android:exported="true" >
+78-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:66:13-36
+79            <intent-filter>
+79-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:67:13-69:29
+80                <action android:name="android.intent.action.BOOT_COMPLETED" />
+80-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:68:17-79
+80-->D:\xampp\htdocs\wholetrade\android-print-service\app\src\main\AndroidManifest.xml:68:25-76
+81            </intent-filter>
+82        </receiver>
+83    </application>
+84
+85</manifest>

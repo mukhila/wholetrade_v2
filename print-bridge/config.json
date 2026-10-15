@@ -1,0 +1,16 @@
+{
+  "server_url":   "http://localhost/wholetrade",
+  "token":        "ce44601e5dfcad9692d8ced1a8d2dd2d0f6b76c5391f42248d192219360e2358",
+  "station":      "main",
+  "format":       "escpos",
+  "poll_ms":      2000,
+
+  "connection":   "network",
+  "printer_host": "192.168.1.100",
+  "printer_port": 9100,
+
+  "printer_path": "POS-80C",
+  "cups_name":    "TSC_DA200",
+  "com_port":     "COM3",
+  "com_baud":     9600
+}
