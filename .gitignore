@@ -26,3 +26,16 @@ android-print-service/app/build/
 CURRENCY_ANALYSIS.md
 PRICE_UPDATES_ANALYSIS.md
 /old/
+public/testing*.php
+public/testing*.html
+public/thermal-invoice.html
+public/thermal-print.blade.php
+public/*.csv
+public/print_design.pdf
+public/escpos_tester.php
+storage/framework/cache/
+storage/framework/sessions/
+storage/framework/views/
+storage/framework/testing/
+storage/app/public/
+storage/app/private/
